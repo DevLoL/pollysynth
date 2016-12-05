@@ -9,6 +9,9 @@
 // each input is a single wire, going to something metal to touch
 // (I used a bunch of big carriage bolts)
 //
+// Additionally filter modulation, input pin 4 and pitch bend, input on pin 5, use capacitive touch sensors
+// with a common output on pin 3.
+//
 // sensing of this is done by getNoteKeys, using the method described at:
 // http://www.arduino.cc/playground/Code/CapacitiveSensor
 //
@@ -24,6 +27,7 @@
 // Having said that, other arduino stuff probably gets loaded in here first
 // because the aligned attribute seems to add a couple of hundred bytes to the code
 
+// comment out this TEST_PATTERN_INTRO if you don't want the funny start melody
 #define TEST_PATTERN_INTRO
 
 //#define FILTER_LPF_NONE
