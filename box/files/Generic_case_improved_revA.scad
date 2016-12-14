@@ -60,8 +60,8 @@ use <MCAD/teardrop.scad>
 // All dimensions are millimeter
 // Case parameters for tailoring  
 box_sx = 120;       // box outside size in X axis, not including mounting tabs
-box_sy = 80;       // box outside size in Y axis
-box_sz = 15;       // box outside size in Z axis, including the lid thickness
+box_sy = 90;       // box outside size in Y axis
+box_sz = 25 ;       // box outside size in Z axis, including the lid thickness
 box_wt = 2.0;      // box wall thickness (keep less than box_cp_hid)
 box_bt = 2.0;      // box base or bottom thickness (should be a multiple of printed layer height)
 
@@ -75,6 +75,11 @@ tab_use = false;     // true or false for mounting tab on x-axis yes/no
 tab_sz = box_bt;    // tab size in z-axis or height (typically set same as box base thickness)
 tab_sx = 8;         // mounting tab size in x-axis (the amount tab extends from box) 
 tab_hoy = 7;        // tab hole offset in y axis from edge of tab
+
+
+pcb_w = 20.3;
+pcb_h = 80;
+pcb_t = 1.7; // thickness
 
 // Fastener and hardware component hole sizing
 /*==================================================== 
@@ -98,7 +103,7 @@ M8 x 1.25    7.20mm  8.80mm  13.0mm   15.01mm  6.8mm   16.0mm   8.0mm   2.0mm   
 #6-32        2.95mm  3.80mm  7.94mm   9.17mm   2.78mm  7.37mm   3.51mm  1.14mm  11.11mm
 #8-32        3.66mm  4.50mm  8.73mm   10.08mm  3.18mm  8.74mm   4.17mm  1.14mm  12.7mm
 #10-24       4.09mm  5.11mm  9.53mm   11.00mm  3.18mm  10.13mm  4.83mm  1.14mm  14.29mm
-#10-32       4.31mm  5.11mm  9.53mm   11.00mm  3.18mm  10.13mm  4.83mm  1.14mm  14.29mm
+#10-32       4.31mm  5.11mm  9.53mm   11.00mm  3.18mm  10.13mm  4.83mm  f1.14mm  14.29mm
 1/4-20       5.56MM  6.76MM  11.11mm  12.83mm  4.76mm  13.03mm  6.35mm  1.80mm  18.65
 Notes:       1,2     2,3     4        5        6       7,8      8,9     8,10    8,11
 ----------------------------------------------------------------------------------------
@@ -252,22 +257,27 @@ module rounded_cube_case (generate_box, generate_lid) {
         translate([ box_sx/2, box_sy/2, (box_sz - lid_sz)/2 + box_bt ]) 
           roundCornersCube( box_sx - (box_wt*2), box_sy - (box_wt*2), box_sz, box_r - box_wt);  
 
-        // Define any holes in the box walls here
-        // Sample teardrop holes with bottom of round lobe at floor of box - uncomment and tailor as desired
-
 
         // Sample round holes centered on available wall height - uncomment and tailor as desired
-        hole_r = 2;
-        translate([ box_sx - box_wt/2, box_sy/3, (box_sz-lid_sz-box_bt)/2 + box_bt ])  // right sidewall
-          rotate([0, 90, 0])
-            cylinder( h=box_wt + MDA, r=hole_r, center=true, $fn=30 );
-        translate([ box_wt/2, box_sy/3, (box_sz-lid_sz-box_bt)/2 + box_bt ])  // left sidewall
-          rotate([0, 90, 0])
-            cylinder( h=box_wt + MDA, r=hole_r, center=true, $fn=30 );
-        translate([ box_wt/2, box_sy/(2.3), (box_sz-lid_sz-box_bt)/2 + box_bt ])  // left sidewall
-          rotate([0, 90, 0])
-            cylinder( h=box_wt + MDA, r=hole_r, center=true, $fn=30 );
-//*/
+        hole_r = 3;
+        translate([0, 0, pcb_t + 4 + box_wt + 1]) {
+            translate([ box_wt/2, box_sy/1.25, 0])  // left sidewall
+              rotate([0, 90, 0])
+                cylinder( h=box_wt + MDA, r=hole_r, center=true, $fn=30 );
+            translate([ box_wt/2, 55, 0])  // left sidewall
+              rotate([0, 90, 0])
+                cylinder( h=box_wt + MDA, r=hole_r, center=true, $fn=30 );
+    //*/
+        }
+
+      // holes to put the battery screws in
+      translate([box_sx/2, box_sy/2 - 20, -0.1]){
+         translate([ -22.5, 0, 0])
+          standoff( post_od = bd_post_od, post_id=0 , post_h=bd_post_h , hole_depth=4); // for M3
+        translate([ 22.5, 0, 0])
+          standoff( post_od = bd_post_od, post_id=0 , post_h=bd_post_h , hole_depth=4); // for M3
+
+      }
 
       }  // end difference
 			
@@ -278,24 +288,74 @@ module rounded_cube_case (generate_box, generate_lid) {
             standoff( box_cp_od, box_cp_hid, box_sz - box_bt - lid_sz + MSA, box_cp_hd );
       }  // end for loop on standoff posts
 
+      // Add speaker
+      translate([box_sx - 30, box_sy - 28, box_wt+MDA]) {
+        %cylinder(12, 25, 15);
+        rotate([0, 0,45]) {
+            translate([ 0, 27, 0])
+            standoff( post_od = bd_post_od, post_id=bd_post_id , post_h=bd_post_h , hole_depth=4); // for M3
+          translate([ 0, -27, 0])
+            standoff( post_od = bd_post_od, post_id=bd_post_id , post_h=bd_post_h , hole_depth=4); // for M3
+          translate([27, 0,0])
+            standoff( post_od = bd_post_od, post_id=bd_post_id , post_h=bd_post_h , hole_depth=4); // for M3
+          translate([-27, 0, 0 ])  // left rear
+            standoff( post_od = bd_post_od, post_id=bd_post_id , post_h=bd_post_h , hole_depth=4); // for M3
+        }
+      }
       // Add any mounting standoff posts on the box bottom here
       // Sample mounting posts for small board centered in box - uncomment and tailor as desired
-/*
-      bd_hsp_x = 34.75;  // board hole spacing in x axis
-      bd_hsp_y = 28;    // board hole spacing in y axis
+      
+      bd_hsp_x = 51;  // board hole spacing in x axis
+      bd_hsp_y = 38;    // board hole spacing in y axis
       bd_post_od = 6;   // diameter of the board mounting post
       bd_post_id = 2.7; // hole diameter in the mounting post (2.7 for threading M3)
-      bd_post_h = 4;    // height of the board mounting posts
-      echo(str("Available height above board posts is ",box_sz - box_bt - lid_sz - bd_post_h,"mm"));
-      translate([ box_sx/2 - bd_hsp_x/2, box_sy/2 - bd_hsp_y/2, box_wt - MSA ])  // forward left corner
-        standoff( post_od = bd_post_od, post_id=bd_post_id , post_h=bd_post_h , hole_depth=4); // for M3
-      translate([ box_sx/2 + bd_hsp_x/2, box_sy/2 - bd_hsp_y/2, box_wt - MSA ])  // forward right
-        standoff( post_od = bd_post_od, post_id=bd_post_id , post_h=bd_post_h , hole_depth=4); // for M3
-      translate([ box_sx/2 + bd_hsp_x/2, box_sy/2 + bd_hsp_y/2, box_wt - MSA ])  // right rear
-        standoff( post_od = bd_post_od, post_id=bd_post_id , post_h=bd_post_h , hole_depth=4); // for M3
-      translate([ box_sx/2 - bd_hsp_x/2, box_sy/2 + bd_hsp_y/2, box_wt - MSA ])  // left rear
-        standoff( post_od = bd_post_od, post_id=bd_post_id , post_h=bd_post_h , hole_depth=4); // for M3
+      bd_post_h = 2;    // height of the board mounting posts      echo(str("Available height above board posts is ",box_sz - box_bt - lid_sz - bd_post_h,"mm"));
+
+      bd_shift_x = -7.9;
+      bd_shift_y = 4;
+
+      translate([ pcb_w/2 + bd_shift_x, bd_shift_y, box_wt - MSA]) {
+        %translate([0,0,bd_post_h]) difference() {
+
+          cube([pcb_w - 2.2, pcb_h - 2.2, pcb_t]);
+          translate([ pcb_w - 4.4, pcb_h - 4.4, 0 ])
+           cylinder( h=2, r=1.35, $fn=12);
+          translate([ 2.2, pcb_h - 4.4, 0 ])
+           cylinder( h=2, r=1.35, $fn=12);
+          translate([ pcb_w - 4.4, 2.2, 0 ])
+           cylinder( h=2, r=1.35, $fn=12);
+          translate([ 2.2, 2.2, 0 ])
+           cylinder( h=2, r=1.35, $fn=12);
+        }
+        translate([ pcb_w - 4.4, pcb_h - 4.4, 0 ])
+          standoff( post_od = bd_post_od, post_id=bd_post_id , post_h=bd_post_h , hole_depth=4); // for M3
+        translate([ 2.2, pcb_h - 4.4, 0 ])
+          standoff( post_od = bd_post_od, post_id=bd_post_id , post_h=bd_post_h , hole_depth=4); // for M3
+
+        translate([ pcb_w - 4.4, 40, 0 ])
+          standoff( post_od = bd_post_od, post_id=bd_post_id , post_h=bd_post_h , hole_depth=4); // for M3
+        translate([ 2.2, 40, 0 ])
+          standoff( post_od = bd_post_od, post_id=bd_post_id , post_h=bd_post_h , hole_depth=4); // for M3
+    }
+
+
+
 //*/      
+
+      // battery holder, pushing against the keyboard
+      translate([box_sx/2, box_sy/2 - 20, 0]){
+        %translate([0, 0, box_wt + 8.9 - MSA])
+            import("../../18650.stl");
+        translate([ -22.5, 0, 0])
+            standoff( post_od = bd_post_od, post_id=bd_post_id , post_h=bd_post_h , hole_depth=4); // for M3
+        translate([ 22.5, 0, 0])
+            standoff( post_od = bd_post_od, post_id=bd_post_id , post_h=bd_post_h , hole_depth=4); // for M3
+
+      }
+      
+      // arduino nano
+      rotate([0, 0, 90]) translate([40, -50, 0]) %cube([44.1,19, 20]);
+
     }  // End union 
 
   }  // end if generate_box
@@ -310,36 +370,9 @@ module rounded_cube_case (generate_box, generate_lid) {
           // Start with a solid plate with rounded corners to match the box part
           translate([ box_sx/2, box_sy/2, lid_sz/2 ])
             roundCornersCube( box_sx, box_sy, lid_sz, box_r );
- 
-          // Add a reinforcement lip to the lid, starting with the straight portions 
-          // increase lip width by MSA to ensure mesh with quarter circle lip added below
-          translate([ box_cp_od + fit_tol, box_wt + fit_tol, lid_sz ]) 
-            cube([box_sx - (box_cp_od*2) - (fit_tol*2), lip_w + MSA, lip_h ]); 
-          translate([box_wt + fit_tol, box_cp_od + fit_tol, lid_sz]) 
-            cube([ lip_w + MSA, box_sy - (box_cp_od*2) - (fit_tol*2), lip_h ]);
-          translate([box_sx - box_cp_or - fit_tol, box_cp_od + fit_tol, lid_sz ]) 
-            cube([lip_w + MSA, box_sy - (box_cp_od*2) - (fit_tol*2), lip_h ]);	
-          translate([box_cp_od + fit_tol, box_sy - box_cp_or - fit_tol, lid_sz]) 
-            cube([box_sx - (box_cp_od*2) - (fit_tol*2), lip_w + MSA, lip_h]);
-					
-          // Fit a quarter circle lip around the corner mounting posts
-          translate([ 0, 0, lid_sz]) 
-            translate( lid_hole_centers[0] ) 
-              rotate(180)  
-                cylindrical_lip( lip_arc_od, lip_h, lip_w );
-          translate([ 0, 0, lid_sz ])
-            translate( lid_hole_centers [1] )
-              rotate(270)  
-                cylindrical_lip( lip_arc_od, lip_h, lip_w );
-          translate([ 0, 0, lid_sz ])
-            translate( lid_hole_centers [2] ) 
-              cylindrical_lip( lip_arc_od, lip_h, lip_w );
-          translate([ 0, 0, lid_sz ])
-            translate( lid_hole_centers [3] )
-              rotate(90)  
-                cylindrical_lip( lip_arc_od, lip_h, lip_w );
-        }  // end union of the base solids for the lid
 
+
+        }  // end union of the base solids for the lid
         for (i = lid_hole_centers) {               // for each corner in the lid
           // remove the material for the corner screw hole 
           translate([ 0, 0, -MSA ])                // shift Z to ensure complete removal of hole
@@ -356,11 +389,25 @@ module rounded_cube_case (generate_box, generate_lid) {
         // Add removal of any holes in the lid here
         // Sample square hole centered in lid - uncomment and tailor as desired
 
-        translate([ box_sx/2, box_sy/2, lid_sz/2 ])
+
+        translate([ box_sx/2, box_sy/3, lid_sz/2 ]) {
+          translate([0, 5, lid_sz - MDA])
+            %cube([100, 50, 1.6], center=true); // the acutal PCB
           cube([ 100, 30, lid_sz + MDA], center=true );
-//*/
+        }
 
       }  // end difference for lid
+
+      // little guide for the keyboard to slide into
+      translate([ box_sx/2, box_sy/2 - 4, lid_sz + 0.8 + MDA]) {
+        difference() {
+          cube([ 108, 58, 1.6], center=true );
+          // big hole to the front side
+          translate([0, -10, 0])
+            cube([ 100, 58+MDA, 2*lid_sz + MDA], center=true );
+        }
+      }
+
     }  // end translate to move away from box if it is also being made
   }  // end if generate_lid
   
