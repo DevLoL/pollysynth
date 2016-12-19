@@ -258,47 +258,36 @@ module rounded_cube_case (generate_box, generate_lid) {
           roundCornersCube( box_sx - (box_wt*2), box_sy - (box_wt*2), box_sz, box_r - box_wt);  
 
 
-        // Sample round holes centered on available wall height - uncomment and tailor as desired
+        // holes in sidewalls
         hole_r = 3;
-        translate([0, 0, pcb_t + 4 + box_wt + 1]) {
-            translate([ box_wt/2, box_sy/1.25, 0])  // left sidewall
+        translate([0, 0, pcb_t + 4 + box_wt + 1.5]) {
+            translate([ box_wt/2, box_sy/1.25, 0])
               rotate([0, 90, 0])
                 cylinder( h=box_wt + MDA, r=hole_r, center=true, $fn=30 );
-            translate([ box_wt/2, 55, 0])  // left sidewall
-              rotate([0, 90, 0])
-                cylinder( h=box_wt + MDA, r=hole_r, center=true, $fn=30 );
-    //*/
+            translate([ box_wt/2, 55, 0])
+                cube([box_wt + MDA,9, 4], center=true);
         }
-
-      // holes to put the battery screws in
-      translate([box_sx/2, box_sy/2 - 20, -0.1]){
-         translate([ -22.5, 0, 0])
-          standoff( post_od = bd_post_od, post_id=0 , post_h=bd_post_h , hole_depth=4); // for M3
-        translate([ 22.5, 0, 0])
-          standoff( post_od = bd_post_od, post_id=0 , post_h=bd_post_h , hole_depth=4); // for M3
-
-      }
 
       }  // end difference
 			
       // Add the corner standoff posts for the lid screws 
       for(i = lid_hole_centers) {
-        translate([ 0, 0, box_bt - MSA ])  // raise up to the inside of the box
+        translate([ 0, 0, box_bt - 1 - MSA ])  // raise up to the inside of the box
           translate(i)                     // locate a corner
-            standoff( box_cp_od, box_cp_hid, box_sz - box_bt - lid_sz + MSA, box_cp_hd );
+            standoff( box_cp_od, box_cp_hid, box_sz - box_bt + 1 - lid_sz + MSA, box_cp_hd );
       }  // end for loop on standoff posts
 
       // Add speaker
-      translate([box_sx - 30, box_sy - 28, box_wt+MDA]) {
+      translate([box_sx - 28.2, box_sy - 28.2, box_wt+MDA - 1]) {
         %cylinder(12, 25, 15);
-        rotate([0, 0,45]) {
-            translate([ 0, 27, 0])
+        rotate([0, 0,28]) {
+            translate([ 0, 26.5, 0])
             standoff( post_od = bd_post_od, post_id=bd_post_id , post_h=bd_post_h , hole_depth=4); // for M3
-          translate([ 0, -27, 0])
+          translate([ 0, -26.5, 0])
             standoff( post_od = bd_post_od, post_id=bd_post_id , post_h=bd_post_h , hole_depth=4); // for M3
-          translate([27, 0,0])
+          translate([26.5, 0,0])
             standoff( post_od = bd_post_od, post_id=bd_post_id , post_h=bd_post_h , hole_depth=4); // for M3
-          translate([-27, 0, 0 ])  // left rear
+          translate([-26.5, 0, 0 ])  // left rear
             standoff( post_od = bd_post_od, post_id=bd_post_id , post_h=bd_post_h , hole_depth=4); // for M3
         }
       }
@@ -309,30 +298,39 @@ module rounded_cube_case (generate_box, generate_lid) {
       bd_hsp_y = 38;    // board hole spacing in y axis
       bd_post_od = 6;   // diameter of the board mounting post
       bd_post_id = 2.7; // hole diameter in the mounting post (2.7 for threading M3)
-      bd_post_h = 2;    // height of the board mounting posts      echo(str("Available height above board posts is ",box_sz - box_bt - lid_sz - bd_post_h,"mm"));
+      bd_post_h = 3;    // height of the board mounting posts      echo(str("Available height above board posts is ",box_sz - box_bt - lid_sz - bd_post_h,"mm"));
 
       bd_shift_x = -7.9;
       bd_shift_y = 4;
 
-      translate([ pcb_w/2 + bd_shift_x, bd_shift_y, box_wt - MSA]) {
+      translate([ pcb_w/2 + bd_shift_x, bd_shift_y, box_bt - MSA - 1]) {
         %translate([0,0,bd_post_h]) difference() {
-
-          cube([pcb_w - 2.2, pcb_h - 2.2, pcb_t]);
-          translate([ pcb_w - 4.4, pcb_h - 4.4, 0 ])
+          cube([pcb_w, pcb_h - 2.2, pcb_t]);
+          translate([ pcb_w - 2.4, pcb_h - 4.4, 0 ])
            cylinder( h=2, r=1.35, $fn=12);
           translate([ 2.2, pcb_h - 4.4, 0 ])
            cylinder( h=2, r=1.35, $fn=12);
-          translate([ pcb_w - 4.4, 2.2, 0 ])
+          translate([ pcb_w - 2.4, 2.2, 0 ])
            cylinder( h=2, r=1.35, $fn=12);
           translate([ 2.2, 2.2, 0 ])
            cylinder( h=2, r=1.35, $fn=12);
         }
-        translate([ pcb_w - 4.4, pcb_h - 4.4, 0 ])
+        // two little blocks behind the pcb so it doesn't get pushed around too much1
+        h = bd_post_h + 1.7;
+        translate([pcb_w+1, 0, h/2]) {
+            translate([ 0, pcb_h - 4.4, 0 ])
+                cube([2, 4, h], center=true);
+            translate([ 0, 40, 0 ])
+                cube([2, 4, h], center=true);
+
+        }
+
+        translate([ pcb_w - 2.4, pcb_h - 4.4, 0 ])
           standoff( post_od = bd_post_od, post_id=bd_post_id , post_h=bd_post_h , hole_depth=4); // for M3
         translate([ 2.2, pcb_h - 4.4, 0 ])
           standoff( post_od = bd_post_od, post_id=bd_post_id , post_h=bd_post_h , hole_depth=4); // for M3
 
-        translate([ pcb_w - 4.4, 40, 0 ])
+        translate([ pcb_w - 2.4, 40, 0 ])
           standoff( post_od = bd_post_od, post_id=bd_post_id , post_h=bd_post_h , hole_depth=4); // for M3
         translate([ 2.2, 40, 0 ])
           standoff( post_od = bd_post_od, post_id=bd_post_id , post_h=bd_post_h , hole_depth=4); // for M3
@@ -346,15 +344,10 @@ module rounded_cube_case (generate_box, generate_lid) {
       translate([box_sx/2, box_sy/2 - 20, 0]){
         %translate([0, 0, box_wt + 8.9 - MSA])
             import("../../18650.stl");
-        translate([ -22.5, 0, 0])
-            standoff( post_od = bd_post_od, post_id=bd_post_id , post_h=bd_post_h , hole_depth=4); // for M3
-        translate([ 22.5, 0, 0])
-            standoff( post_od = bd_post_od, post_id=bd_post_id , post_h=bd_post_h , hole_depth=4); // for M3
-
       }
       
       // arduino nano
-      rotate([0, 0, 90]) translate([40, -50, 0]) %cube([44.1,19, 20]);
+      rotate([0, 0, 90]) translate([40, -50, box_wt]) %cube([44.1,19, 20]);
 
     }  // End union 
 
@@ -399,12 +392,14 @@ module rounded_cube_case (generate_box, generate_lid) {
       }  // end difference for lid
 
       // little guide for the keyboard to slide into
-      translate([ box_sx/2, box_sy/2 - 4, lid_sz + 0.8 + MDA]) {
+      translate([ box_sx/2, box_sy/2 - 10, lid_sz + 0.8 + MDA]) {
         difference() {
-          cube([ 108, 58, 1.6], center=true );
+          union() {
+            roundCornersCube( 108, 58, 1.6, 16 );
+          }
           // big hole to the front side
-          translate([0, -10, 0])
-            cube([ 100, 58+MDA, 2*lid_sz + MDA], center=true );
+          translate([0, 0, 0])
+            cube([ 102, 52+MDA, 2*lid_sz + MDA], center=true );
         }
       }
 
