@@ -342,8 +342,8 @@ module rounded_cube_case (generate_box, generate_lid) {
 
       // battery holder, pushing against the keyboard
       translate([box_sx/2, box_sy/2 - 20, 0]){
-        %translate([0, 0, box_wt + 8.9 - MSA])
-            import("../../18650.stl");
+        translate([0, 0, box_wt + 7.5])
+            18650_holder();
       }
       
       // arduino nano
@@ -410,4 +410,35 @@ module rounded_cube_case (generate_box, generate_lid) {
 
 }  // end module rounded_cube_case
 
+module 18650_holder() {
+    length = 65.2;
+    diameter = 18.6;
+    wall = 2;
+    allowance = 0.4;
+    w_a_2 = (wall + allowance) * 2;
 
+    %rotate([0, 90, 0])
+        cylinder(r=diameter/2, h = length, center=true);
+
+    difference() {
+        cube([length + w_a_2, diameter + w_a_2, diameter ], center=true);
+        translate([0, 0, wall]) {
+            cube([length + allowance*2, diameter + allowance * 2,  diameter + wall * 2], center=true);
+            translate([0, 0, diameter * 0.3]) // move cut-out up
+                cube([length * 0.8, diameter + w_a_2 * 2,  diameter], center=true);
+            cube([length * 0.3, diameter + w_a_2 * 2,  diameter - w_a_2 + wall], center=true);
+            cube([length + w_a_2 * 2, diameter/2,  2], center=true); // hole for metal clips
+        }
+    }
+    intersection() { 
+        translate([0, 0, - allowance]) rotate([0, 90, 0]) {
+            difference() {
+                cylinder(h = length * 0.6, r = (2 * w_a_2 + diameter)/2 , center=true);
+                cylinder(h = length * 0.7, r = allowance + (diameter)/2, center=true);
+                cube([diameter * w_a_2 * 2, diameter + w_a_2*2, length * 0.4], center=true);
+            }
+        }
+        translate([-length/2, -(w_a_2 + diameter)/2, 2 * wall - diameter * 0.3])
+            cube([length,  diameter + w_a_2, diameter/3]);
+    }
+}
