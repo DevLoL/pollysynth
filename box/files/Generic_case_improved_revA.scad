@@ -388,6 +388,9 @@ module rounded_cube_case (generate_box, generate_lid) {
             %cube([100, 50, 1.6], center=true); // the acutal PCB
           cube([ 100, 30, lid_sz + MDA], center=true );
         }
+        // a bit of space for the cables
+        translate([box_sx/2, box_sy/2 + 13, lid_sz])
+          cube([ 100, 6, lid_sz* 0.75], center=true );
 
       }  // end difference for lid
 
